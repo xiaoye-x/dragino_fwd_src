@@ -76,6 +76,7 @@ install:
 	cp -f config/global_conf.json /etc/lora
 	cp -f config/local_conf.json /etc/lora
 	cp -f draginofwd.service /lib/systemd/system 
+	install -m 755 libmqtt/libpahomqtt3c.so /usr/lib
 	install -m 755 sx1301hal/libsx1301hal.so /usr/lib
 	install -m 755 sx1302hal/libsx1302hal.so /usr/lib
 	install -m 755 build_fwd_sx1301/fwd_sx1301 /usr/bin
@@ -85,9 +86,7 @@ install:
 	install -m 755 build_station_sx1302/build-mips-openwrt-dragino/bin/station_sx1302 /usr/bin
 	install -m 755 tools/reset_lgw.sh /usr/bin
 	ln -sf /usr/bin/fwd_sx1302 /usr/bin/fwd
-	echo "Starting dragino forward for sx1302 ..."
-	systemctl enable draginofwd
-	systemctl start draginofwd
+	ln -sf /usr/local/lib/libmpsse.so  /usr/lib/
 	echo "INSTALL DONE!"
 
 uninstall:
