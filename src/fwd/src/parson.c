@@ -1,6 +1,5 @@
-/*
- Parson ( http://kgabis.github.com/parson/ )
- Copyright (c) 2012 - 2016 Krzysztof Gabis
+/* 
+Copyright (c) 2012 - 2016 Krzysztof Gabis
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +33,7 @@
 
 #include "compiler.h"
 #include "lgwmm.h"
+#include "utilities.h"
 
 #define STARTING_CAPACITY         15
 #define ARRAY_MAX_CAPACITY    122880 /* 15*(2^13) */
@@ -44,7 +44,6 @@
 #define SIZEOF_TOKEN(a)       (sizeof(a) - 1)
 #define SKIP_CHAR(str)        ((*str)++)
 #define SKIP_WHITESPACES(str) while (isspace(**str)) { SKIP_CHAR(str); }
-#define MAX(a, b)             ((a) > (b) ? (a) : (b))
 
 #undef malloc
 #undef free

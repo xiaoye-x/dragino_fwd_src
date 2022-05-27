@@ -31,3 +31,5 @@ rasspberrypi:   ./hp0z-make-deb.sh  d
 
 编译出来的是 deb 包, 需要装时运行: dpkg -i *.deb
 
+##2022/05/26  
+修改utilities和parson.h里的MAX重复定义的错误
