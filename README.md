@@ -1,11 +1,11 @@
-# Introduce.
+# 1. Introduce.
 SX1301/SX1302/SX1308 LoRaWAN concentrator driver. For devices:
 - Armbian Platform: HP0A, HP0C, LPS8v2. 
 - Raspberry Pi Platform: HP0D
 - OpenWrt Platform: LG308, LG308N, LPS8, LPS8N, LIG16, DLOS8, DLOS8N.
 
-# How to use
-## For Armbian Platform
+# 2. How to use
+## 2.1 For Armbian Platform
 Git Clone in Armbian and Enter into src: run
 ```
 ./hp0z-make-deb.sh  c
@@ -20,7 +20,7 @@ to install
 Reference Link: [Armbian Compile Instruction](http://wiki1.dragino.com/xwiki/bin/view/Main/Armbian%20OS%20instruction/#HHowtorecompileLoRaWANConcentratorDriver28dragino-fwdpackage29.)
 
 
-## For Raspberry Pi Platform
+## 2.2 For Raspberry Pi Platform
 
 Git Clone in Armbian and Enter into src: run
 ```
@@ -33,12 +33,12 @@ dpkg -i *.deb
 ```
 to install 
 
-## For OpenWrt Platform
+## 2.3 For OpenWrt Platform
 See [OpenWrt compile instruction](https://github.com/dragino/openwrt_lede-18.06#how-to-develop-a-c-software-before-build-the-image)
 
 
 
-# History Before move to this github
+# 3. History Before move to this github
 ## 2021.12.16
 file: fwd/src/pkt_serv.c
 remove element from dn_list when size biger than 16
