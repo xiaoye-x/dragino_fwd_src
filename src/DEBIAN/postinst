@@ -1,0 +1,9 @@
+#!/bin/bash
+VER="2022-05-26"
+uci set gateway.general.fwd_version="$VER"
+uci commit gateway
+[[ ! -e /dev/i2c-0 && -e /dev/i2c-1 ]] && ln -sf /dev/i2c-1 /dev/i2c-0
+/usr/local/dragino/generate-config.sh start > /dev/null 2>&1
+systemctl enable draginofwd
+systemctl stop draginofwd
+systemctl start draginofwd
