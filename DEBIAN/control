@@ -1,7 +1,0 @@
-Package: draginofwd       
-Version: 1               
-Section: free           
-Prioritt: optional     
-Architecture: armhf   
-Maintainer: dragino@dragino.com    
-Description: Dragino lora pakeage forward
