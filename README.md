@@ -62,9 +62,6 @@ file:/fwd/src/pkt_serv.c
 Move all SX1302 src for different platform (hp0x series, pi series, lgxxx series.)  to the same github
 hp0x use new station, 
 lg0x series use old station
-hp系列使用新的station, lg系列使用原来旧的station
-
-lg系列编译方法不变
 
 
 
