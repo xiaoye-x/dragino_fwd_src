@@ -4,34 +4,38 @@ SX1301/SX1302/SX1308 LoRaWAN concentrator driver. For devices:
 - Raspberry Pi Platform: HP0D
 - OpenWrt Platform: LG308, LG308N, LPS8, LPS8N, LIG16, DLOS8, DLOS8N.
 
-# 2. How to use
-## 2.1 For Armbian Platform
-Git Clone in Armbian and Enter into src: run
-```
-./hp0z-make-deb.sh  c
-```
-to get deb package . 
-and run 
-```
-dpkg -i *.deb
-```
-to install 
+# 2. How to Compile
+
+## Requirements:
+1. sudo apt install -y libsqlite3-dev
+2. sudo apt install -y libftdi1-dev
+
+## 2.1 For Debian Platform
+
+###Compile:
+1. Git Clone from: git clone https://github.com/dragino/dragino_fwd_src.git 
+2. Enter into dragino_fwd_src/src, type command: ./hp0z-make-deb.sh  c
+   the option 'c' mean you will compile for HP0C 
+3. Wait until you get the *.deb package
+4. Run 'dpkg -i' for install 
 
 Reference Link: [Armbian Compile Instruction](http://wiki1.dragino.com/xwiki/bin/view/Main/Armbian%20OS%20instruction/#HHowtorecompileLoRaWANConcentratorDriver28dragino-fwdpackage29.)
 
 
 ## 2.2 For Raspberry Pi Platform
 
-Git Clone in Armbian and Enter into src: run
+### download the source: git clone https://github.com/dragino/dragino_fwd_src.git
 ```
-./hp0z-make-deb.sh  d
+cd dragino_fwd_src
+make clean
+./hp0z-make-deb.sh  r
 ```
-to get deb package . 
-and run 
+
+
+### After build succeed, install deb package . 
 ```
-dpkg -i *.deb
+dpkg -i draginofwd-($version).deb
 ```
-to install 
 
 ## 2.3 For OpenWrt Platform
 See [OpenWrt compile instruction](https://github.com/dragino/openwrt_lede-18.06#how-to-develop-a-c-software-before-build-the-image)
@@ -64,6 +68,8 @@ hp0x use new station,
 lg0x series use old station
 
 
-
 ## 2022/05/26  
 Fix MAX definition error in utilities and parson.h
+
+## 2022/05/31
+add support sx1301 chips

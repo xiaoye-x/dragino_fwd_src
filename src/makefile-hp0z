@@ -13,7 +13,13 @@ VER=$(shell date -u '+%Y-%m-%d')
 
 .PHONY: all clean install sx1302hal sx1301hal fwd_sx1301 fwd_sx1302 libmqtt station_sx1302 station_sx1301 prepare deb
 
-all: fwd_sx1302 station_sx1302 
+ifdef RASBMOD
+TARGET=fwd_sx1302 fwd_sx1301 station_sx1302 station_sx1301
+else
+TARGET=fwd_sx1302 station_sx1302
+endif
+
+all: $(TARGET)
 
 prepare: prep.sh
 	./prep-hp0z.sh
@@ -46,6 +52,7 @@ clean:
 	$(MAKE) clean -e -C sx1301hal
 	$(MAKE) clean -e -C sx1302hal
 	$(MAKE) clean -e -C libmqtt
+	$(MAKE) clean -e -C libmpsse
 	rm -rf build_*_sx*
 	rm -rf draginofwd*.deb
 

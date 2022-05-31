@@ -13,15 +13,28 @@ case "$1" in
     "c")
         board="hp0c"
         ;;
+    "r")
+        board="rasb"
+        ;;
     *)
         board="hp0c"
         ;;
 esac
 
-echo "start compile fwd..."
-make -f makefile-hp0z  ||  exit 1
+if [[ "$board" = "rasb" ]]; then
+    echo "start compile libmpsse..."
+    make all -e -C libmpsse  || exit 1
+    make install  -C libmpsse  || exit 1
+    echo "start compile fwd..."
+    make -f makefile-hp0z RASBMOD=1 ||  exit 1
+else
+    echo "start compile fwd..."
+    make -f makefile-hp0z  ||  exit 1
+fi
 
 echo "start make deb package..."
+
+echo "FWD build succeed, start make deb package..."
 
 echo "deb version: draginofwd-${VER}"
 
@@ -59,6 +72,11 @@ if [[ "$board" = "hp0c" ]]; then
     install -m 755 tools/reset_lgw-hp0c.sh pi_pkg/usr/bin/reset_lgw.sh
 else
     install -m 755 tools/reset_lgw-hp0d.sh pi_pkg/usr/bin/reset_lgw.sh
+fi
+if [[ "$board" = "rasb" ]]; then
+    install -m 755 sx1301hal/libsx1301hal.so pi_pkg/usr/lib/libsx1301hal.so
+    install -m 755 build_fwd_sx1301/fwd_sx1301 pi_pkg/usr/bin
+    install -m 755 build_station_sx1301/build-mips-openwrt-dragino/bin/station_sx1301 pi_pkg/usr/bin
 fi
 ln -sf /usr/bin/fwd_sx1302 pi_pkg/usr/bin/fwd
 dpkg-deb -Zgzip -b pi_pkg draginofwd-${VER}.deb
