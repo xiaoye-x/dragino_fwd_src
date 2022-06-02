@@ -46,6 +46,7 @@ clean:
 	$(MAKE) clean -e -C sx1301hal
 	$(MAKE) clean -e -C sx1302hal
 	$(MAKE) clean -e -C libmqtt
+	$(MAKE) clean -e -C libmpsse
 	$(MAKE) clean -e -C tools
 	rm -rf build_*_sx* draginofwd*.deb
 

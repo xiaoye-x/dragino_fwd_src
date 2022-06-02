@@ -16,6 +16,7 @@ SX1301/SX1302/SX1308 LoRaWAN concentrator driver. For devices:
 1. Git Clone from: git clone https://github.com/dragino/dragino_fwd_src.git 
 2. Enter into dragino_fwd_src/src, type command: ./hp0z-make-deb.sh  c
    the option 'c' mean you will compile for HP0C 
+   the option 'd' mean you will compile for HP0D 
 3. Wait until you get the *.deb package
 4. Run 'dpkg -i' for install 
 
@@ -25,17 +26,27 @@ Reference Link: [Armbian Compile Instruction](http://wiki1.dragino.com/xwiki/bin
 ## 2.2 For Raspberry Pi Platform
 
 ### download the source: git clone https://github.com/dragino/dragino_fwd_src.git
+
+make if with sx1301/sx1308
 ```
 cd dragino_fwd_src
 make clean
-./hp0z-make-deb.sh  r
+./hp0z-make-deb.sh  r1
 ```
 
+make if with sx1302
+```
+cd dragino_fwd_src
+make clean
+./hp0z-make-deb.sh  r2
+```
 
-### After build succeed, install deb package . 
+### After build succeed, install debian package . 
 ```
-dpkg -i draginofwd-($version).deb
+dpkg -i draginofwd-($board)_($version).deb
 ```
+$board will be rasp301 or rasp302
+$version will be xxxx-xx-xx , which is current date.
 
 ## 2.3 For OpenWrt Platform
 See [OpenWrt compile instruction](https://github.com/dragino/openwrt_lede-18.06#how-to-develop-a-c-software-before-build-the-image)
@@ -73,3 +84,8 @@ Fix MAX definition error in utilities and parson.h
 
 ## 2022/05/31
 add support sx1301 chips
+
+## 2022/05/31
+1. add cfg-301 cfg-302 cfg-308
+2. fix sx1301 chips error
+3. change compile option: if raspberry, build with sx1301 use option 'r1', build with sx1302 use 'r2'

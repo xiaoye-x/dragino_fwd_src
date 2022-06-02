@@ -11,18 +11,15 @@ VER=$(shell date -u '+%Y-%m-%d')
 
 ### general build targets
 
-.PHONY: all clean install sx1302hal sx1301hal fwd_sx1301 fwd_sx1302 libmqtt station_sx1302 station_sx1301 prepare deb
+.PHONY: all clean install sx1302hal sx1301hal fwd_sx1301 fwd_sx1302 libmqtt station_sx1302 station_sx1301 deb
 
-ifdef RASBMOD
-TARGET=fwd_sx1302 fwd_sx1301 station_sx1302 station_sx1301
+ifdef RASPMOD
+TARGET=fwd_sx1301 station_sx1301
 else
 TARGET=fwd_sx1302 station_sx1302
 endif
 
 all: $(TARGET)
-
-prepare: prep.sh
-	./prep-hp0z.sh
 
 sx1301hal: 
 	$(MAKE) all -e -C $@
@@ -36,16 +33,16 @@ libmqtt:
 libmbedtls:
 	$(MAKE) all -e -C libmbedtls
 
-fwd_sx1301: sx1301hal libmqtt prepare
+fwd_sx1301: sx1301hal libmqtt 
 	$(MAKE) all -e -C build_fwd_sx1301 SX1301MOD=1
 
-fwd_sx1302: sx1302hal libmqtt prepare
+fwd_sx1302: sx1302hal libmqtt 
 	$(MAKE) all -e -C build_fwd_sx1302 HP0MOD=1
 
-station_sx1302: sx1302hal prepare
+station_sx1302: sx1302hal 
 	$(MAKE) all -e -C build_station_sx1302 HP0MOD=1 SX1302MOD=1
 
-station_sx1301: sx1301hal prepare
+station_sx1301: sx1301hal 
 	$(MAKE) all -e -C build_station_sx1301 HP0MOD=1 SX1301MOD=1
 
 clean:
