@@ -978,7 +978,7 @@ static void gps_process_sync(void) {
 
 	/* get GPS time for synchronization */
 	if (i != LGW_GPS_SUCCESS) {
-		lgw_log(LOG_WARNING, "WARNING~ [GPS] could not get GPS time from GPS\n");
+		lgw_log(LOG_TIMERSYNC, "WARNING~ [GPS] could not get GPS time from GPS\n");
 		return;
 	}
 
@@ -987,7 +987,7 @@ static void gps_process_sync(void) {
 	i = lgw_get_trigcnt(&trig_tstamp);
 	pthread_mutex_unlock(&GW.hal.mx_concent);
 	if (i != LGW_HAL_SUCCESS) {
-		lgw_log(LOG_WARNING, "WARNING~ [GPS] failed to read concentrator timestamp\n");
+		lgw_log(LOG_TIMERSYNC, "WARNING~ [GPS] failed to read concentrator timestamp\n");
 		return;
 	}
 
@@ -996,7 +996,7 @@ static void gps_process_sync(void) {
 	i = lgw_gps_sync(&GW.gps.time_reference_gps, trig_tstamp, utc, gps_time);
 	pthread_mutex_unlock(&GW.gps.mx_timeref);
 	if (i != LGW_GPS_SUCCESS) {
-		lgw_log(LOG_WARNING, "WARNING~ [GPS] GPS out of sync, keeping previous time reference\n");
+		lgw_log(LOG_TIMERSYNC, "WARNING~ [GPS] GPS out of sync, keeping previous time reference\n");
 	}
 }
 
@@ -1186,7 +1186,7 @@ static void thread_valid(void) {
 				// fprintf(log_file,"%.18lf,\"track\"\n", GW.hal.xtal_correct); // DEBUG
 			}
 		}
-		lgw_log(LOG_INFO, "Time ref: %s, XTAL correct: %s (%.15lf)\n", 
+		lgw_log(LOG_TIMERSYNC, "Time ref: %s, XTAL correct: %s (%.15lf)\n", 
                 ref_valid_local ? "valid" : "invalid", GW.hal.xtal_correct_ok ? "valid" : "invalid", GW.hal.xtal_correct);	// DEBUG
 	}
 	lgw_log(LOG_INFO, "INFO~ [valid] End of validation thread\n");
