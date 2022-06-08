@@ -89,3 +89,9 @@ add support sx1301 chips
 1. add cfg-301 cfg-302 cfg-308
 2. fix sx1301 chips error
 3. change compile option: if raspberry, build with sx1301 use option 'r1', build with sx1302 use 'r2'
+
+## 2022/06/06
+1. change gps time's  log level to timesync in fwd.c
+
+## 2022/06/08
+2. add PATH env in postinst script
