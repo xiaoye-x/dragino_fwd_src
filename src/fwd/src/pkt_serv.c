@@ -69,7 +69,7 @@ static int strcpypt(char* dest, const char* src, int* start, int size, int len);
 static enum jit_error_e custom_rx2dn(dn_pkt_s* dnelem, devinfo_s *devinfo, uint32_t us, uint8_t txmode) {
     int i, fsize = 0;
 
-    uint32_t dwfcnt = 65535;
+    uint32_t dwfcnt = 1;
 
     uint8_t payload_en[DEFAULT_PAYLOAD_SIZE] = {'\0'};  /* data which have decrypted */
     struct lgw_pkt_tx_s txpkt;
@@ -130,7 +130,7 @@ static enum jit_error_e custom_rx2dn(dn_pkt_s* dnelem, devinfo_s *devinfo, uint3
     /* 这个key重启将会删除, 下发的计数器 */
     sprintf(db_family, "/downlink/%08X", devinfo->devaddr);
     if (lgw_db_get(db_family, "fcnt", tmpstr, sizeof(tmpstr)) == -1) {
-        lgw_db_put(db_family, "fcnt", "65535");
+        lgw_db_put(db_family, "fcnt", "1");
     } else { 
         dwfcnt = atol(tmpstr);
         sprintf(tmpstr, "%u", dwfcnt + 1);
@@ -402,7 +402,7 @@ static void pkt_deal_up(void* arg) {
 
             decode_mac_pkt_up(&macmsg, p);
 
-            if (GW.cfg.mac_decoded || GW.cfg.custom_downlink) {
+            if (GW.cfg.mac_decode || GW.cfg.custom_downlink) {
                 devinfo_s devinfo = { .devaddr = macmsg.FHDR.DevAddr, 
                                       .devaddr_str = {0},
                                       .appskey_str = {0},
@@ -426,7 +426,7 @@ static void pkt_deal_up(void* arg) {
                 lgw_log(LOG_DEBUG, "\n");
                 */
 
-                if (GW.cfg.mac_decoded) {
+                if (GW.cfg.mac_decode) {
                     int l;
                     uint32_t fcnt, mic;
 					bool fcnt_valid = false;

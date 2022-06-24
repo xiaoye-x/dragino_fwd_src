@@ -94,4 +94,27 @@ add support sx1301 chips
 1. change gps time's  log level to timesync in fwd.c
 
 ## 2022/06/08
-2. add PATH env in postinst script
+1. add PATH env in postinst script
+
+## 2022/06/13
+1. remove i2c link in postinst script
+2. copy sx1302 include file loragw_i2c.h to loragw_i2c.h.rasp when using board hp0d or rasp
+3. add config option: td_enabled(ture/false), time_diff(+-number) strings format (3 chars). 
+
+## 2022/06/20  (release: dragino_gw_fwd_2.7.0-1_mips_24kc.ipk )
+1. lbt function add
+   configure:  
+   1. lbt_tty_enabled : true/false
+   2. lbt_tty_path :  example /dev/ttyUSB4
+   3. lbt_tty_baude(option) : default 9600
+   4. lbt_rssi_target(option) : default -85
+   5. lbt_scan_time_ms(option) : default 6ms
+2. lbt test utily:  lbt_test_utily
+   useage: lbt_test_utily /dev/ttyUSB4 "AT+GETCHANSTAT=923200000,-85,6"
+           This will be send AT command to ttyUSB4, 10 loops every 2 seconds
+   
+3. localtime zone
+    confiure:
+    1. td_enabled : true/false
+    if td_enabled, will be attach 3 characters to payload ( example: +08 / -08 )
+

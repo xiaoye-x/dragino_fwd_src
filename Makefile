@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dragino_gw_fwd
-PKG_VERSION:=2.5.0
+PKG_VERSION:=2.7.0
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -34,13 +34,9 @@ define Package/$(PKG_NAME)/description
 endef
 
 define Package/$(PKG_NAME)/extra_provides
-	echo 'libmbedcrypto.so.1';\
 	echo 'libmbedcrypto.so.0';\
 	echo 'libmbedtls.so.10';\
-	echo 'libmbedx509.so.0';\
-	echo 'libmbedcrypto.so.7';\
-	echo 'libmbedtls.so.14';\
-	echo 'libmbedx509.so.1'
+	echo 'libmbedx509.so.0'
 endef
 
 define Build/Prepare
@@ -68,6 +64,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build_fwd_sx1302/fwd_sx1302 $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build_fwd_sx1301/fwd_sx1301 $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build_fwd_sx1302/lbt_test_utily $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/sx1302hal/test_* $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/sx1301hal/test_loragw_hal $(1)/usr/bin/sx1301_test_hal
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build_station_sx1302/build-mips-openwrt-dragino/bin/station_sx1302 $(1)/usr/bin

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# hp0d(rasp)  spi=spi0.0 i2c=i2c-1 reset=23
+# hp0c(h3)    spi=spi1.0 i2c=i2c-0 reset=20
+# wrt(He)     spi=/dev/spi1.0 i2c=i2c-0 reset=23
+#
+#
+#
+
 VER=$(date -u '+%Y-%m-%d')
 
 [[ -z $1 ]] && exit 1
@@ -8,6 +15,7 @@ VER=$(date -u '+%Y-%m-%d')
 
 prepare() {
     [[ "$1" = "rasp301" ]] && cp -f sx1301hal/inc/loragw_spi.h.rasp sx1301hal/inc/loragw_spi.h
+    [[ "$1" != "hp0c" ]] && cp -f sx1302hal/inc/loragw_i2c.h.rasp sx1302hal/inc/loragw_i2c.h
     [[ ! -d build_fwd_sx1301 ]] && cp -rf fwd build_fwd_sx1301
     [[ ! -d build_fwd_sx1302 ]] && cp -rf fwd build_fwd_sx1302
     [[ ! -d build_staion_sx1301 ]] && cp -rf station-new build_station_sx1301

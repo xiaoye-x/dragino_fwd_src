@@ -44,7 +44,9 @@
  * \param [IN] b 2nd value
  * \retval minValue Minimum value
  */
+#ifndef MIN
 #define MIN(a, b) ({ typeof(a) __a = (a); typeof(b) __b = (b); ((__a > __b) ? __b : __a);})
+#endif
 
 /*!
  * \brief Returns the maximum value between a and b
@@ -53,7 +55,9 @@
  * \param [IN] b 2nd value
  * \retval maxValue Maximum value
  */
+#ifndef MAX
 #define MAX(a, b) ({ typeof(a) __a = (a); typeof(b) __b = (b); ((__a < __b) ? __b : __a);})
+#endif
 
 /*!
  * \brief swap value between a and b

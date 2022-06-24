@@ -378,7 +378,7 @@ enum jit_error_e jit_peek(struct jit_queue_s *queue, uint32_t time_us, int *pkt_
     pthread_mutex_lock(&mx_jit_queue);
 
     /* Search for highest priority packet to be sent */
-    for (i=0; i<queue->num_pkt; i++) {
+    for (i = 0; i < queue->num_pkt; i++) {
         /* First check if that packet is outdated:
          *  If a packet seems too much in advance, and was not rejected at enqueue time,
          *  it means that we missed it for peeking, we need to drop it

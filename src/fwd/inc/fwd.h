@@ -82,6 +82,8 @@
 
 #define ACK_BUFF_SIZE                       64
 
+#define NB_LBT_QUEUE                        16
+
 #define UNIX_GPS_EPOCH_OFFSET               315964800 
 
 #define XERR_INIT_AVG       128	/* number of measurements the XTAL correction is averaged on as initial value */

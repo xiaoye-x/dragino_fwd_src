@@ -199,6 +199,12 @@ typedef struct _server {
 
 LGW_LIST_HEAD_NOLOCK(serv_list, _server);  // pkts list head of rxpkts for server 
 
+struct lbt_chan_stat {
+    uint32_t freq_hz;
+    uint32_t count_us;  // 时间
+    bool chan_is_free;
+};
+
 typedef struct {
     struct {
         char gateway_id[17];	/* string form of gateway mac address */
@@ -223,13 +229,15 @@ typedef struct {
     struct {
         bool     radiostream_enabled;	
         bool     ghoststream_enabled;	
+        bool     td_enabled;              /* if enable time diff form UTC */	
         bool     wd_enabled;		      /* if watchdog enabled   */
-        bool     mac_decoded;             /* if mac header decode for abp */
+        bool     mac_decode;             /* if mac header decode for abp */
         bool     mac2file;                /* if payload text save to file */
         bool     mac2db;                  /* if payload text save to database */
         bool     custom_downlink;         /* if make a custome downlink to node */
         time_t   last_loop;               /* timestamp for watchdog */
-        uint32_t time_interval;
+        uint32_t time_interval;           /* time interval for send status */
+        char   time_diff[8];               /* time diff of UTC, UTC + diff = TZ */
         char   ghost_host[32];
         char   ghost_port[16];
         region_s   region;
@@ -252,6 +260,17 @@ typedef struct {
         pthread_mutex_t mx_timeref;	    /* control access to GPS time reference */
         pthread_mutex_t mx_meas_gps;	/* control access to the GPS statistics */
     } gps;
+
+    struct {
+        bool   lbt_tty_enabled;         /* enable LBT */
+        char   lbt_tty_path[64];        /* path of the TTY port LBT is connected on */
+        int    lbt_tty_fd;              /* LBT fd */
+        int8_t lbt_rssi_target;         /* RSSI threshold to detect if channel is busy or not (dBm) */
+        uint32_t lbt_tty_baude;         /* bauderate */
+        uint32_t lbt_freq_hz;               
+        uint16_t lbt_scan_time_ms;      /* scan time for LBT */
+        struct lbt_chan_stat lbt_stat[16];
+    } lbt;
 
     struct {
         struct lgw_tx_gain_lut_s txlut[LGW_RF_CHAIN_NB];
@@ -307,17 +326,25 @@ typedef struct {
                               .hal.xtal_correct_ok = false,                          \
                               .hal.xtal_correct = 1.0,                               \
                               .cfg.wd_enabled = false,                               \
+                              .cfg.td_enabled = false,                               \
                               .cfg.radiostream_enabled = true,                       \
                               .cfg.ghoststream_enabled = false,                      \
                               .cfg.autoquit_threshold = 0,                           \
-                              .cfg.mac_decoded = false,                              \
+                              .cfg.mac_decode = false,                               \
                               .cfg.mac2file = false,                                 \
                               .cfg.mac2db = false,                                   \
                               .cfg.custom_downlink = false,                          \
                               .cfg.time_interval = 30,                               \
+                              .cfg.time_diff = "8",                                  \
                               .gps.gps_tty_path[0] = 0,                              \
                               .gps.mx_timeref  = PTHREAD_MUTEX_INITIALIZER,          \
                               .gps.mx_meas_gps = PTHREAD_MUTEX_INITIALIZER,          \
+                              .lbt.lbt_tty_enabled = false,                          \
+                              .lbt.lbt_tty_path[0] = 0,                              \
+                              .lbt.lbt_tty_fd = -1,                                  \
+                              .lbt.lbt_tty_baude = 9600,                             \
+                              .lbt.lbt_rssi_target = -85,                            \
+                              .lbt.lbt_scan_time_ms = 6,                             \
                               .beacon.beacon_period    = 0,                          \
                               .beacon.beacon_freq_hz   = DEFAULT_BEACON_FREQ_HZ,     \
                               .beacon.beacon_freq_nb   = DEFAULT_BEACON_FREQ_NB,     \

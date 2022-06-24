@@ -747,7 +747,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
     return 0;
 }
 
-#else     // ################## if not sx1302 else sx1301 #################
+#else     // ################## if sx1302 else sx1301 #################
 
 static int parse_SX130x_configuration(const char* conf_file) {
     int i;
@@ -1190,9 +1190,9 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         GW.cfg.ghoststream_enabled = (bool)json_value_get_boolean(val);
         if (GW.cfg.ghoststream_enabled == true) {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] ghoststream_enabled is true\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] ghoststream_enabled is enable\n");
         } else {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] ghoststream_enabled is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] ghoststream_enabled is disable\n");
         }
     } 
 
@@ -1200,9 +1200,9 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         GW.cfg.radiostream_enabled = (bool)json_value_get_boolean(val);
         if (GW.cfg.radiostream_enabled == true) {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] radiostream_enable is true\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] radiostream_enable is enable\n");
         } else {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] radiostream_enable is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] radiostream_enable is disable\n");
         }
     } 
 
@@ -1210,40 +1210,51 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         GW.cfg.wd_enabled = (bool)json_value_get_boolean(val);
         if (GW.cfg.wd_enabled == true) {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] wd_enable is true\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] wd_enable is enable\n");
         } else {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] wd_enable is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] wd_enable is disable\n");
         }
     } 
+
+    val = json_object_get_value(conf_obj, "td_enabled"); /* fetch value (if possible) */
+    if (json_value_get_type(val) == JSONBoolean) {
+        GW.cfg.td_enabled = (bool)json_value_get_boolean(val);
+        if (GW.cfg.td_enabled == true) {
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] td_enable is enable\n");
+        } else {
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] td_enable is disable\n");
+        }
+    } else
+        lgw_log(LOG_INFO, "INFO~ [LoadCFG] td_enable is disable\n");
 
     val = json_object_get_value(conf_obj, "logger_enabled"); /* fetch value (if possible) */
     if (json_value_get_type(val) == JSONBoolean) {
         GW.log.logger_enabled = (bool)json_value_get_boolean(val);
         if (GW.log.logger_enabled == true) {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] logger_enabled is true\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] logger_enabled is enable\n");
         } else {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] logger_enabled is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] logger_enabled is disenable\n");
         }
     } 
 
     val = json_object_get_value(conf_obj, "mac_decode"); /* fetch value (if possible) */
     if (json_value_get_type(val) == JSONBoolean) {
-        GW.cfg.mac_decoded = (bool)json_value_get_boolean(val);
-        if (GW.cfg.mac_decoded == true) {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] mac_decode is true\n");
+        GW.cfg.mac_decode = (bool)json_value_get_boolean(val);
+        if (GW.cfg.mac_decode == true) {
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] mac_decode is enable\n");
         } else {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] mac_decode is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] mac_decode is disable\n");
         }
     } else 
-        lgw_log(LOG_INFO, "INFO~ [LoadCFG] mac_decode is false\n");
+        lgw_log(LOG_INFO, "INFO~ [LoadCFG] mac_decode is disable\n");
 
     val = json_object_get_value(conf_obj, "mac2db"); /* fetch value (if possible) */
     if (json_value_get_type(val) == JSONBoolean) {
         GW.cfg.mac2db = (bool)json_value_get_boolean(val);
         if (GW.cfg.mac2db == true) {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] mac2db is true\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] mac2db is enable\n");
         } else {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] mac2db is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] mac2db is disable\n");
         }
     } 
     
@@ -1251,9 +1262,9 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         GW.cfg.mac2file = (bool)json_value_get_boolean(val);
         if (GW.cfg.mac2file == true) {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] mac2file is true\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] mac2file is enable\n");
         } else {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] mac2file is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] mac2file is disable\n");
         }
     } 
 
@@ -1261,9 +1272,9 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         GW.cfg.custom_downlink = (bool)json_value_get_boolean(val);
         if (GW.cfg.custom_downlink == true) {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] custom_downlink is true\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] custom_downlink is enable\n");
         } else {
-            lgw_log(LOG_INFO, "INFO~ [LoadCFG] custom_downlink is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] custom_downlink is disable\n");
         }
     } 
 
@@ -1430,6 +1441,13 @@ static int parse_gateway_configuration(const char* conf_file) {
         lgw_log(LOG_INFO, "INFO~ [LoadCFG] time_interval is configured to %u \n", GW.cfg.time_interval);
     }
 
+    /* time diff of UTC: string */
+    str = json_object_get_string(conf_obj, "time_diff");
+    if (str != NULL) {
+        strncpy(GW.cfg.time_diff, str, sizeof GW.cfg.time_diff);
+        GW.cfg.time_diff[sizeof GW.cfg.time_diff - 1] = '\0'; /* ensure string termination */
+        lgw_log(LOG_INFO, "INFO~ [LoadCFG] GW time_diff of UTC: \"%s\"\n", GW.cfg.time_diff);
+    }
 
     /* get reference coordinates */
     val = json_object_get_value(conf_obj, "ref_latitude");
@@ -1457,6 +1475,42 @@ static int parse_gateway_configuration(const char* conf_file) {
         } else {
             lgw_log(LOG_INFO, "INFO~ [LoadCFG] fake GPS is disabled\n");
         }
+    }
+
+    /* LBT module TTY configure(optional) */
+    val = json_object_get_value(conf_obj, "lbt_tty_enabled"); /* fetch value (if possible) */
+    if (json_value_get_type(val) == JSONBoolean) {
+        GW.lbt.lbt_tty_enabled = (bool)json_value_get_boolean(val);
+        if (GW.lbt.lbt_tty_enabled == true) {
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] lbt_tty_enabled is enabled\n");
+        } else {
+            lgw_log(LOG_INFO, "INFO~ [LoadCFG] lbt_tty_enabled is disabled\n");
+        }
+    } 
+
+    /* LBT module TTY enabled */
+    if (GW.lbt.lbt_tty_enabled) {
+        str = json_object_get_string(conf_obj, "lbt_tty_path");
+        if (str != NULL) {
+            strncpy(GW.lbt.lbt_tty_path, str, sizeof GW.lbt.lbt_tty_path);
+            GW.lbt.lbt_tty_path[sizeof GW.lbt.lbt_tty_path - 1] = '\0'; /* ensure string termination */
+        }
+        lgw_log(LOG_INFO, "INFO~ [LoadCFG] LBT serial port path is configured to \"%s\"\n", GW.lbt.lbt_tty_path);
+
+        val = json_object_get_value(conf_obj, "lbt_tty_baude");
+        if (val != NULL)
+            GW.lbt.lbt_tty_baude = (uint32_t)json_value_get_number(val);
+        lgw_log(LOG_INFO, "INFO~ [LoadCFG] LBT tty bauderate  is configured to \"%u\"\n", GW.lbt.lbt_tty_baude);
+
+        val = json_object_get_value(conf_obj, "lbt_rssi_target");
+        if (val != NULL)
+            GW.lbt.lbt_rssi_target = (int8_t)json_value_get_number(val);
+        lgw_log(LOG_INFO, "INFO~ [LoadCFG] LBT rssi threshold is configured to \"%d\"\n", GW.lbt.lbt_rssi_target);
+
+        val = json_object_get_value(conf_obj, "lbt_scan_time_ms");
+        if (val != NULL)
+            GW.lbt.lbt_scan_time_ms = (uint16_t)json_value_get_number(val);
+        lgw_log(LOG_INFO, "INFO~ [LoadCFG] LBT rssi scan time is configured to \"%u\"\n", GW.lbt.lbt_scan_time_ms);
     }
 
     /* Beacon signal period (optional) */

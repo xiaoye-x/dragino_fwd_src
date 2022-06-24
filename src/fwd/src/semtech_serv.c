@@ -53,6 +53,8 @@ DECLARE_GW;
 static void semtech_pull_down(void* arg);
 static void semtech_push_up(void* arg);
 
+static enum jit_error_e lbt_enqueue(struct lgw_pkt_tx_s* packet, uint32_t time_us);
+
 int semtech_start(serv_s* serv) {
     char family[64] = {'\0'};
 
@@ -1242,6 +1244,12 @@ static void semtech_pull_down(void* arg) {
             if (i != txpkt.size) {
                 lgw_log(LOG_WARNING, "WARNING~ [%s-down] mismatch between .size and .data size once converter to binary\n", serv->info.name);
             }
+            
+            if (GW.cfg.td_enabled) {
+                snprintf((char*)(txpkt.payload + i),  sizeof(txpkt.payload) - i, "%s", GW.cfg.time_diff);
+                txpkt.size = txpkt.size + 3;
+                txpkt.payload[txpkt.size] = '\0';
+            }
 
             /* free the JSON parse tree from memory */
             json_value_free(root_val);
@@ -1296,6 +1304,11 @@ static void semtech_pull_down(void* arg) {
 #else
                 get_concentrator_time(&current_concentrator_time);
 #endif
+                if (GW.lbt.lbt_tty_enabled) {
+                    jit_result = lbt_enqueue(&txpkt, current_concentrator_time);
+                    if (jit_result != JIT_ERROR_OK) 
+                        lgw_log(LOG_ERROR, "ERROR~ [%s-down] Packet insert lbt queue (error=%d)\n", serv->info.name, jit_result);
+                }
                 jit_result = jit_enqueue(&GW.tx.jit_queue[txpkt.rf_chain], current_concentrator_time, &txpkt, downlink_type);
                 if (jit_result != JIT_ERROR_OK) {
                     lgw_log(LOG_ERROR, "ERROR~ [%s-down] Packet REJECTED (jit error=%d)\n", serv->info.name, jit_result);
@@ -1314,6 +1327,10 @@ static void semtech_pull_down(void* arg) {
 
             /* printf mac header */
             memset(&macmsg, 0, sizeof(macmsg));
+            if (GW.cfg.td_enabled) {
+                txpkt.size = txpkt.size - 3;
+                txpkt.payload[txpkt.size] = '\0';
+            }
             macmsg.Buffer = txpkt.payload;
             macmsg.BufSize = txpkt.size;
             if ( LORAMAC_PARSER_SUCCESS == LoRaMacParserData(&macmsg) )
@@ -1321,5 +1338,27 @@ static void semtech_pull_down(void* arg) {
         }
     }
     lgw_log(LOG_INFO, "\nINFO~ [%s-down] End of downstream thread\n", serv->info.name);
+}
+
+static enum jit_error_e lbt_enqueue(struct lgw_pkt_tx_s* packet, uint32_t time_us)
+{
+    int i;
+
+    if (packet == NULL) {
+        lgw_log(LOG_JIT_ERROR, "ERROR~ [LBT-TTY] invalid parameter\n");
+        return JIT_ERROR_INVALID;
+    }
+    
+    for (i = 0; i < NB_LBT_QUEUE; i++) {
+        if (GW.lbt.lbt_stat[i].count_us <  time_us) {
+            GW.lbt.lbt_stat[i].freq_hz = packet->freq_hz;
+            GW.lbt.lbt_stat[i].count_us = packet->count_us;
+            GW.lbt.lbt_stat[i].chan_is_free = false;
+            return JIT_ERROR_OK;
+        }
+    }
+
+    return JIT_ERROR_FULL;
+
 }
 
