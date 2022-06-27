@@ -110,8 +110,12 @@ add support sx1301 chips
    4. lbt_rssi_target(option) : default -85
    5. lbt_scan_time_ms(option) : default 6ms
 2. lbt test utily:  lbt_test_utily
-   useage: lbt_test_utily /dev/ttyUSB4 "AT+GETCHANSTAT=923200000,-85,6"
-           This will be send AT command to ttyUSB4, 10 loops every 2 seconds
+   useage: lbt_test_utily /dev/ttyUSB4 923200000
+           This will be send AT command to ttyUSB4, 10 loops every 1ms
+   run lbt_test_utily display how to useage.
+
+usb module can only make 60ms scan loop.
+
    
 3. localtime zone
     confiure:

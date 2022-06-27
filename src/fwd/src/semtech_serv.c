@@ -1307,13 +1307,13 @@ static void semtech_pull_down(void* arg) {
                 if (GW.lbt.lbt_tty_enabled) {
                     jit_result = lbt_enqueue(&txpkt, current_concentrator_time);
                     if (jit_result != JIT_ERROR_OK) 
-                        lgw_log(LOG_ERROR, "ERROR~ [%s-down] Packet insert lbt queue (error=%d)\n", serv->info.name, jit_result);
+                        lgw_log(LOG_ERROR, "ERROR~ [%s-LBT] Packet lbt queue (error=%d)\n", serv->info.name, jit_result);
                 }
                 jit_result = jit_enqueue(&GW.tx.jit_queue[txpkt.rf_chain], current_concentrator_time, &txpkt, downlink_type);
                 if (jit_result != JIT_ERROR_OK) {
                     lgw_log(LOG_ERROR, "ERROR~ [%s-down] Packet REJECTED (jit error=%d)\n", serv->info.name, jit_result);
                 } else {
-                    lgw_log(LOG_INFO, "INFO~ [%s-down] %u:A packet enqueue\n", serv->info.name, txpkt.count_us);
+                    lgw_log(LOG_INFO, "DEBUG~ [%s-down] A packet enqueue, us=%u, cur_us=%u\n", serv->info.name, txpkt.count_us, current_concentrator_time);
                     /* In case of a warning having been raised before, we notify it */
                     jit_result = warning_result;
                 }

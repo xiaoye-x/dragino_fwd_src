@@ -143,6 +143,7 @@ cp -f config/local_conf.json pi_pkg/etc/lora
 
 cp -rf DEBIAN pi_pkg/
 cp -rf draginofwd.service pi_pkg/lib/systemd/system
+cp -rf draginostation.service pi_pkg/lib/systemd/system
 
 dpkg-deb -Zgzip -b pi_pkg draginofwd-${board}_${VER}.deb
 

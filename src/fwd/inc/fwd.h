@@ -82,7 +82,7 @@
 
 #define ACK_BUFF_SIZE                       64
 
-#define NB_LBT_QUEUE                        16
+#define NB_LBT_QUEUE                        8
 
 #define UNIX_GPS_EPOCH_OFFSET               315964800 
 

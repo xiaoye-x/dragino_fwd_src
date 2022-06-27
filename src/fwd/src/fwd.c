@@ -172,7 +172,7 @@ void lgw_unregister_atexit(void (*func)(void))
 
 static void sig_handler(int sigio);
 
-static bool lbt_getchan_stat(int fd, uint32_t freq_hz, uint8_t rssi_target, uint16_t scan_time_ms);
+static bool lbt_getchan_stat(int fd, uint32_t freq_hz, int8_t rssi_target, uint16_t scan_time_ms);
 
 /* threads */
 static void thread_up(void);
@@ -961,8 +961,10 @@ static void thread_jit(void) {
                                     break;
                                 }
                             }
-                            if (!matching)
+                            if (!matching) {
+                                lgw_log(LOG_DEBUG, "DEBUG~ [LBT] count_us not found in lbt queue\n", i);
                                 chanisfree = false;
+                            }
                         }
 
                         if (chanisfree) {
@@ -1365,16 +1367,18 @@ static void thread_spectral_scan(void) {
 
 #endif
 
-static bool lbt_getchan_stat(int fd, uint32_t freq_hz, uint8_t rssi_target, uint16_t scan_time_ms) 
+static bool lbt_getchan_stat(int fd, uint32_t freq_hz, int8_t rssi_target, uint16_t scan_time_ms) 
 {
     int ret;
     struct timespec s_time;
     struct timespec e_time;
 
+    if (fd < 0) return false;
+
     clock_gettime(CLOCK_MONOTONIC, &s_time);
     char buffer[48] = {'\0'};
-    snprintf(buffer, sizeof(buffer), "AT+GETCHANSTAT=%u,%u,%u\r\n", freq_hz, rssi_target, scan_time_ms);
-    lgw_log(LOG_DEBUG, "DEBUG~ [DNLK] LBT send command to UART (%s)\n", buffer);
+    snprintf(buffer, sizeof(buffer), "AT+GETCHANSTAT=%u,%i,%u\r\n", freq_hz, rssi_target, scan_time_ms);
+    lgw_log(LOG_DEBUG, "DEBUG~ [DNLK] LBT command: %s", buffer);
     ret = uart_send(fd, buffer, strlen(buffer) + 1); 
     if (ret == -1) {
         lgw_log(LOG_ERROR, "ERROR~ [DNLK] LBT get channel stat error (cannot send command to uart)\n");
@@ -1383,13 +1387,13 @@ static bool lbt_getchan_stat(int fd, uint32_t freq_hz, uint8_t rssi_target, uint
     memset(buffer, 0, sizeof(buffer));
     uart_read(fd, buffer, 4, 1000);  /* 1000 (1s) default timeout ms for read ,  4 is sizeof FREE */
     clock_gettime(CLOCK_MONOTONIC, &e_time);
-    lgw_log(LOG_DEBUG, "DEBUG~ [DNLK] lbt scan in %i ms\n", (int)(1000 * difftimespec(e_time, s_time)));
+    lgw_log(LOG_DEBUG, "DEBUG~ [DNLK] lbt scan use %i ms\n", (int)(1000 * difftimespec(e_time, s_time)));
 
     if (buffer[0] == 'F') {
-        lgw_log(LOG_DEBUG, "DEBUG~ [DNLK] LBT chan(%d) is free (%s)\n", freq_hz, buffer);
+        lgw_log(LOG_DEBUG, "DEBUG~ [DNLK] LBT chan(%u) is FREE\n", freq_hz);
         return true;
     } else {
-        lgw_log(LOG_DEBUG, "DEBUG~ [DNLK] LBT chan(%d) unaviable \n", freq_hz);
+        lgw_log(LOG_DEBUG, "DEBUG~ [DNLK] LBT chan(%u) is BUSY\n", freq_hz);
         return false;
     }
 }
@@ -1399,7 +1403,7 @@ static bool lbt_getchan_stat(int fd, uint32_t freq_hz, uint8_t rssi_target, uint
 
 static void thread_lbt_scan(void) 
 {
-    int i;
+    int i, j;
     uint32_t current_concentrator_time;
     uint32_t diff_time;
 
@@ -1409,17 +1413,19 @@ static void thread_lbt_scan(void)
         GW.lbt.lbt_stat[i].chan_is_free = false;
     }
 
-    GW.lbt.lbt_tty_fd = uart_open(GW.lbt.lbt_tty_path);
-    if (GW.lbt.lbt_tty_fd != -1)
-        uart_config(GW.lbt.lbt_tty_fd, GW.lbt.lbt_tty_baude, 9, 9, 9, 9);  /* 9 use default */
-    else {
-        lgw_log(LOG_ERROR, "ERROR~ [LBT-TTY] cannot open tty path, exit\n");
-        return;
-    }
-
-	lgw_log(LOG_INFO, "INFO~ [LBT-TTY] start lbt scan program\n");
+	lgw_log(LOG_INFO, "INFO~ [LBT] start lbt scan program\n");
 
     while (!exit_sig && !quit_sig) {
+        if (GW.lbt.lbt_tty_fd < 0) {
+            GW.lbt.lbt_tty_fd = uart_open(GW.lbt.lbt_tty_path);
+            if (GW.lbt.lbt_tty_fd != -1)
+                uart_config(GW.lbt.lbt_tty_fd, GW.lbt.lbt_tty_baude, 9, 9, 9, 9);  /* 9 use default */
+            else {
+                lgw_log(LOG_ERROR, "ERROR~ [LBT] cannot open tty path, continue\n");
+                wait_ms(5000); 
+                continue;
+            }
+        }
 #ifdef SX1302MOD
         pthread_mutex_lock(&GW.hal.mx_concent);
         lgw_get_instcnt(&current_concentrator_time);
@@ -1427,23 +1433,32 @@ static void thread_lbt_scan(void)
 #else
         get_concentrator_time(&current_concentrator_time);
 #endif
+
+        j = 0;
+
         for (i = 0; i < NB_LBT_QUEUE; i++) {
             diff_time = GW.lbt.lbt_stat[i].count_us - current_concentrator_time;
-            if (diff_time > 120000 &&  diff_time < 1000000) {   // 1.5s
+
+            if (diff_time > 40000 &&  diff_time < 120000) {   
                 GW.lbt.lbt_stat[i].chan_is_free = lbt_getchan_stat(GW.lbt.lbt_tty_fd, GW.lbt.lbt_stat[i].freq_hz, GW.lbt.lbt_rssi_target, 6);
-	            lgw_log(LOG_DEBUG, "DEBUG~ [LBT-TTY] scan chan free=%s, us=%u\n", GW.lbt.lbt_stat[i].chan_is_free ? "TRUE" : "FALSE", GW.lbt.lbt_stat[i].count_us);
-            } else {
-                GW.lbt.lbt_stat[i].chan_is_free = false;
-            }
-            wait_ms(60);
+	            lgw_log(LOG_DEBUG, "DEBUG~ [LBT] (%d)scan chan(%u) free=%s, us=%u\n", i, GW.lbt.lbt_stat[i].freq_hz, GW.lbt.lbt_stat[i].chan_is_free ? "TRUE" : "FALSE", GW.lbt.lbt_stat[i].count_us);
+                j++;
+                wait_ms(12);  // rssi_scan_time_ms
+            } //else {
+               // GW.lbt.lbt_stat[i].chan_is_free = false;
+                //wait_ms(60);
+            //}
+            
+            if (diff_time > 10000000)  // (10s will be remove)
+                GW.lbt.lbt_stat[i].count_us = 0;
         }
-        wait_ms(10);  // rssi_scan_time_ms
+        wait_ms(5 + 30 * j);  // rssi_scan_time_ms
     }
 
-    if (GW.lbt.lbt_tty_fd != -1)
+    if (GW.lbt.lbt_tty_fd > 0)
         uart_close(GW.lbt.lbt_tty_fd);
 
-	lgw_log(LOG_INFO, "INFO~ [LBT-TTY] Exiting lbt scan program\n");
+	lgw_log(LOG_INFO, "INFO~ [LBT] Exiting lbt scan program\n");
 }
 
 /* --- EOF ------------------------------------------------------------------ */
