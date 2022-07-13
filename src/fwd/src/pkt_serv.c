@@ -460,7 +460,7 @@ static void pkt_deal_up(void* arg) {
                         if (GW.cfg.mac2file) {
                             FILE *fp;
                             char pushpath[128];
-                            char rssi_snr[18] = {'\0'};
+                            char rssi_snr[32] = {'\0'};
                             snprintf(pushpath, sizeof(pushpath), "/var/iot/channels/%08X", devinfo.devaddr);
                             fp = fopen(pushpath, "w+");
                             if (NULL == fp)

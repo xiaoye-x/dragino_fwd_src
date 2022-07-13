@@ -89,6 +89,8 @@ uint8_t LOG_DEBUG = 0;
 uint8_t LOG_TIMERSYNC = 0;
 uint8_t LOG_MEM = 0;
 
+uint32_t cur_hal_time = 0;
+
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC DECLARATION ---------------------------------------- */
 
@@ -890,7 +892,6 @@ static void thread_jit(void) {
     int result = LGW_HAL_SUCCESS;
     struct lgw_pkt_tx_s pkt;
     int pkt_index = -1;
-    uint32_t current_concentrator_time;
     enum jit_error_e jit_result;
     enum jit_pkt_type_e pkt_type;
     uint8_t tx_status;
@@ -907,12 +908,12 @@ static void thread_jit(void) {
             /* transfer data and metadata to the concentrator, and schedule TX */
 #ifdef SX1302MOD
             pthread_mutex_lock(&GW.hal.mx_concent);
-            lgw_get_instcnt(&current_concentrator_time);
+            lgw_get_instcnt(&cur_hal_time);
             pthread_mutex_unlock(&GW.hal.mx_concent);
 #else
-            get_concentrator_time(&current_concentrator_time);
+            get_concentrator_time(&cur_hal_time);
 #endif
-            jit_result = jit_peek(&GW.tx.jit_queue[i], current_concentrator_time, &pkt_index);
+            jit_result = jit_peek(&GW.tx.jit_queue[i], cur_hal_time, &pkt_index);
             if (jit_result == JIT_ERROR_OK) {
                 if (pkt_index > -1) {
                     jit_result = jit_dequeue(&GW.tx.jit_queue[i], pkt_index, &pkt, &pkt_type);
@@ -1416,6 +1417,7 @@ static void thread_lbt_scan(void)
 	lgw_log(LOG_INFO, "INFO~ [LBT] start lbt scan program\n");
 
     while (!exit_sig && !quit_sig) {
+
         if (GW.lbt.lbt_tty_fd < 0) {
             GW.lbt.lbt_tty_fd = uart_open(GW.lbt.lbt_tty_path);
             if (GW.lbt.lbt_tty_fd != -1)
@@ -1426,10 +1428,9 @@ static void thread_lbt_scan(void)
                 continue;
             }
         }
+
 #ifdef SX1302MOD
-        pthread_mutex_lock(&GW.hal.mx_concent);
-        lgw_get_instcnt(&current_concentrator_time);
-        pthread_mutex_unlock(&GW.hal.mx_concent);
+        current_concentrator_time = cur_hal_time;
 #else
         get_concentrator_time(&current_concentrator_time);
 #endif
@@ -1452,6 +1453,7 @@ static void thread_lbt_scan(void)
             if (diff_time > 10000000)  // (10s will be remove)
                 GW.lbt.lbt_stat[i].count_us = 0;
         }
+
         wait_ms(5 + 30 * j);  // rssi_scan_time_ms
     }
 

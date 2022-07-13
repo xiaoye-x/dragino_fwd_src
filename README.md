@@ -122,3 +122,9 @@ usb module can only make 60ms scan loop.
     1. td_enabled : true/false
     if td_enabled, will be attach 3 characters to payload ( example: +08 / -08 )
 
+## 2022/07/05  (release: dragino_gw_fwd_2.7.1-1_mips_24kc.ipk )
+1. fix bug can't get counter time form concentor when use sx1302
+
+## 2022/07/11  (release: dragino_gw_fwd_2.7.1-1_mips_24kc.ipk )
+1. fix bug  rssi and snr not equal when macdecode
+2. add cfg-30? configure file to config path

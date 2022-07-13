@@ -75,6 +75,7 @@ install -m 755 libmqtt/libpahomqtt3c.so pi_pkg/usr/lib/libpahomqtt3c.so
 
 case "$board" in 
     "hp0c")
+        cp -rf config/cfg-30? pi_pkg/etc/lora/
         install -m 755 sx1302hal/libsx1302hal.so pi_pkg/usr/lib/libsx1302hal.so
         install -m 755 sx1302hal/test_loragw_hal_rx pi_pkg/usr/bin/rx_test
         install -m 755 sx1302hal/test_loragw_hal_tx pi_pkg/usr/bin/tx_test
@@ -88,6 +89,7 @@ case "$board" in
         ln -sf /usr/bin/fwd_sx1302 pi_pkg/usr/bin/fwd
         ;;
     "hp0d")
+        cp -rf config/cfg-30? pi_pkg/etc/lora/
         install -m 755 sx1302hal/libsx1302hal.so pi_pkg/usr/lib/libsx1302hal.so
         install -m 755 sx1302hal/test_loragw_hal_rx pi_pkg/usr/bin/rx_test
         install -m 755 sx1302hal/test_loragw_hal_tx pi_pkg/usr/bin/tx_test
@@ -101,7 +103,7 @@ case "$board" in
         ln -sf /usr/bin/fwd_sx1302 pi_pkg/usr/bin/fwd
         ;;
     "rasp301")
-        cp -rf cfg-301 pi_pkg/etc/lora/
+        cp -rf config/cfg-301 pi_pkg/etc/lora/
         install -m 644 cfg-301/EU-global_conf.json pi_pkg/etc/lora/global_conf.json
         install -m 755 libmpsse/libmpsse.so pi_pkg/usr/lib/libmpsse.so
         install -m 755 sx1301hal/libsx1301hal.so pi_pkg/usr/lib/libsx1301hal.so
@@ -111,7 +113,7 @@ case "$board" in
         ln -sf /usr/bin/fwd_sx1301 pi_pkg/usr/bin/fwd
         ;;
     "rasp302")
-        cp -rf cfg-302 pi_pkg/etc/lora/
+        cp -rf config/cfg-302 pi_pkg/etc/lora/
         install -m 755 sx1302hal/libsx1302hal.so pi_pkg/usr/lib/libsx1302hal.so
         install -m 755 sx1302hal/test_loragw_hal_rx pi_pkg/usr/bin/rx_test
         install -m 755 sx1302hal/test_loragw_hal_tx pi_pkg/usr/bin/tx_test
@@ -125,6 +127,7 @@ case "$board" in
         ln -sf /usr/bin/fwd_sx1302 pi_pkg/usr/bin/fwd
         ;;
     *)
+        cp -rf config/cfg-30? pi_pkg/etc/lora/
         install -m 755 sx1302hal/libsx1302hal.so pi_pkg/usr/lib/libsx1302hal.so
         install -m 755 sx1302hal/test_loragw_hal_rx pi_pkg/usr/bin/rx_test
         install -m 755 sx1302hal/test_loragw_hal_tx pi_pkg/usr/bin/tx_test
