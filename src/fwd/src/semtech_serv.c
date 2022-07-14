@@ -299,6 +299,17 @@ static void semtech_push_up(void* arg) {
                         //pthread_exit(NULL);
                     }
                 }
+            } else { 
+                clock_gettime(CLOCK_REALTIME, &pkt_utc_time);
+                x = gmtime(&(pkt_utc_time.tv_sec)); /* split the UNIX timestamp to its calendar components */
+                j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, ",\"time\":\"%04i-%02i-%02iT%02i:%02i:%02i.%06liZ\"", (x->tm_year)+1900, (x->tm_mon)+1, x->tm_mday, x->tm_hour, x->tm_min, x->tm_sec, (pkt_utc_time.tv_nsec)/1000); /* ISO 8601 format */
+                if (j > 0) {
+                    buff_index += j;
+                } else {
+                    lgw_log(LOG_ERROR, "ERROR~ [%s-up] snprintf failed line %u\n", serv->info.name, (__LINE__ - 4));
+                    buff_index = 21; /* skip that packet */
+                    continue;
+                }
             }
 
             /* Packet concentrator channel, RF chain & RX frequency, 34-36 useful chars */

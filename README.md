@@ -128,3 +128,6 @@ usb module can only make 60ms scan loop.
 ## 2022/07/11  (release: dragino_gw_fwd_2.7.1-1_mips_24kc.ipk )
 1. fix bug  rssi and snr not equal when macdecode
 2. add cfg-30? configure file to config path
+
+## 2022/07/14  (release: dragino_gw_fwd_2.7.2-0_mips_24kc.ipk )
+1. add time section for rxpkt when timer_ref by system  (semtech_serv.c)

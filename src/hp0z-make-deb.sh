@@ -68,10 +68,10 @@ sed -i "s/^.*VER=.*/VER=\"${VER}\"/" DEBIAN/postinst
 sed -i "s/^.*Version:.*/Version: ${VER}/" DEBIAN/control
 mkdir -p pi_pkg/lib/systemd/system
 mkdir -p pi_pkg/etc/lora
+mkdir -p pi_pkg/etc/station
 mkdir -p pi_pkg/usr/lib
 mkdir -p pi_pkg/usr/bin
 
-install -m 755 libmqtt/libpahomqtt3c.so pi_pkg/usr/lib/libpahomqtt3c.so
 
 case "$board" in 
     "hp0c")
@@ -141,6 +141,11 @@ case "$board" in
         ln -sf /usr/bin/fwd_sx1302 pi_pkg/usr/bin/fwd
         ;;
 esac
+
+install -m 755 libmqtt/libpahomqtt3c.so pi_pkg/usr/lib/libpahomqtt3c.so
+install -m 755 station/bin/rinit.sh pi_pkg/usr/bin
+
+cp -f station/config/station-sx1302.conf pi_pkg/etc/station/station.conf
 
 cp -f config/local_conf.json pi_pkg/etc/lora
 
