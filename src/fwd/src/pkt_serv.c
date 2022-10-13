@@ -63,7 +63,7 @@ LGW_LIST_HEAD_STATIC(dn_list, _dn_pkt); // downlink for customer
 
 static void pkt_prepare_downlink(void* arg);
 static void pkt_deal_up(void* arg);
-static void prepare_frame(uint8_t, devinfo_s*, uint32_t, const uint8_t*, int, uint8_t*, int*);
+static void prepare_frame(uint8_t, devinfo_s*, uint32_t, const uint8_t*, int, uint8_t*, int*, uint8_t);
 static int strcpypt(char* dest, const char* src, int* start, int size, int len);
 
 static enum jit_error_e custom_rx2dn(dn_pkt_s* dnelem, devinfo_s *devinfo, uint32_t us, uint8_t txmode) {
@@ -140,7 +140,7 @@ static enum jit_error_e custom_rx2dn(dn_pkt_s* dnelem, devinfo_s *devinfo, uint3
     /* prepare MAC message */
     lgw_memset(payload_en, '\0', sizeof(payload_en));
 
-    prepare_frame(FRAME_TYPE_DATA_UNCONFIRMED_DOWN, devinfo, dwfcnt++, (uint8_t *)dnelem->payload, dnelem->psize, payload_en, &fsize);
+    prepare_frame(FRAME_TYPE_DATA_UNCONFIRMED_DOWN, devinfo, dwfcnt++, (uint8_t *)dnelem->payload, dnelem->psize, payload_en, &fsize, dnelem->txport);
 
     lgw_memcpy(txpkt.payload, payload_en, fsize);
 
@@ -164,7 +164,7 @@ static enum jit_error_e custom_rx2dn(dn_pkt_s* dnelem, devinfo_s *devinfo, uint3
     return jit_result;
 }
 
-static void prepare_frame(uint8_t type, devinfo_s *devinfo, uint32_t downcnt, const uint8_t* payload, int payload_size, uint8_t* frame, int* frame_size) {
+static void prepare_frame(uint8_t type, devinfo_s *devinfo, uint32_t downcnt, const uint8_t* payload, int payload_size, uint8_t* frame, int* frame_size, uint8_t fport) {
 	uint32_t mic;
 	uint8_t index = 0;
 	uint8_t* encrypt_payload;
@@ -197,11 +197,11 @@ static void prepare_frame(uint8_t type, devinfo_s *devinfo, uint32_t downcnt, co
 
 	/*FOpts*/
 	/*Fport*/
-	frame[++index] = (DEFAULT_DOWN_FPORT)&0xFF;
+	frame[++index] = fport&0xFF;
 
 	/*encrypt the payload*/
 	encrypt_payload = lgw_malloc(sizeof(uint8_t) * payload_size);
-	LoRaMacPayloadEncrypt(payload, payload_size, (DEFAULT_DOWN_FPORT == 0) ? devinfo->nwkskey : devinfo->appskey, devinfo->devaddr, DOWN, downcnt, encrypt_payload);
+	LoRaMacPayloadEncrypt(payload, payload_size, (fport == 0) ? devinfo->nwkskey : devinfo->appskey, devinfo->devaddr, DOWN, downcnt, encrypt_payload);
 	++index;
 	memcpy(frame + index, encrypt_payload, payload_size);
 	lgw_free(encrypt_payload);
@@ -657,6 +657,13 @@ static void pkt_prepare_downlink(void* arg) {
                         entry->rxwindow = 0;
                 } else 
                     entry->rxwindow = 2; 
+
+                if (strcpypt(tmpstr, (char*)buff_down, &start, size, sizeof(tmpstr)) > 0) {
+                    entry->txport = atoi(tmpstr);
+                    if (entry->txport > 255 || entry->txport < 0)
+                        entry->txport = DEFAULT_DOWN_FPORT;
+                } else 
+                    entry->txport = DEFAULT_DOWN_FPORT; 
 
                 if (strstr(entry->pdformat, "hex") != NULL) { 
                     if (psize % 2) {

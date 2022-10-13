@@ -18,8 +18,8 @@ prepare() {
     [[ "$1" != "hp0c" ]] && cp -f sx1302hal/inc/loragw_i2c.h.rasp sx1302hal/inc/loragw_i2c.h
     [[ ! -d build_fwd_sx1301 ]] && cp -rf fwd build_fwd_sx1301
     [[ ! -d build_fwd_sx1302 ]] && cp -rf fwd build_fwd_sx1302
-    [[ ! -d build_staion_sx1301 ]] && cp -rf station-new build_station_sx1301
-    [[ ! -d build_staion_sx1302 ]] && cp -rf station-new build_station_sx1302
+    [[ ! -d build_staion_sx1301 ]] && cp -rf station-arm build_station_sx1301
+    [[ ! -d build_staion_sx1302 ]] && cp -rf station-arm build_station_sx1302
 }
 
 case "$1" in 
@@ -64,7 +64,7 @@ echo "Deb package: draginofwd-${board}_${VER}.deb"
 rm -rf pi_pkg
 rm -rf draginofwd-*.deb
 
-sed -i "s/^.*VER=.*/VER=\"${VER}\"/" DEBIAN/postinst
+sed -i "s/^.*VER=.*/VER=\"${VER}\"/" hp0z-postinst
 sed -i "s/^.*Version:.*/Version: ${VER}/" DEBIAN/control
 mkdir -p pi_pkg/lib/systemd/system
 mkdir -p pi_pkg/etc/lora
@@ -75,6 +75,7 @@ mkdir -p pi_pkg/usr/bin
 
 case "$board" in 
     "hp0c")
+        cp -f hp0z-postinst DEBIAN/postinst
         cp -rf config/cfg-30? pi_pkg/etc/lora/
         install -m 755 sx1302hal/libsx1302hal.so pi_pkg/usr/lib/libsx1302hal.so
         install -m 755 sx1302hal/test_loragw_hal_rx pi_pkg/usr/bin/rx_test
@@ -89,6 +90,7 @@ case "$board" in
         ln -sf /usr/bin/fwd_sx1302 pi_pkg/usr/bin/fwd
         ;;
     "hp0d")
+        cp -f hp0z-postinst DEBIAN/postinst
         cp -rf config/cfg-30? pi_pkg/etc/lora/
         install -m 755 sx1302hal/libsx1302hal.so pi_pkg/usr/lib/libsx1302hal.so
         install -m 755 sx1302hal/test_loragw_hal_rx pi_pkg/usr/bin/rx_test
@@ -103,6 +105,7 @@ case "$board" in
         ln -sf /usr/bin/fwd_sx1302 pi_pkg/usr/bin/fwd
         ;;
     "rasp301")
+        cp -f rasp-postinst DEBIAN/postinst
         cp -rf config/cfg-301 pi_pkg/etc/lora/
         install -m 644 cfg-301/EU-global_conf.json pi_pkg/etc/lora/global_conf.json
         install -m 755 libmpsse/libmpsse.so pi_pkg/usr/lib/libmpsse.so
@@ -113,6 +116,7 @@ case "$board" in
         ln -sf /usr/bin/fwd_sx1301 pi_pkg/usr/bin/fwd
         ;;
     "rasp302")
+        cp -f rasp-postinst DEBIAN/postinst
         cp -rf config/cfg-302 pi_pkg/etc/lora/
         install -m 755 sx1302hal/libsx1302hal.so pi_pkg/usr/lib/libsx1302hal.so
         install -m 755 sx1302hal/test_loragw_hal_rx pi_pkg/usr/bin/rx_test
@@ -127,6 +131,7 @@ case "$board" in
         ln -sf /usr/bin/fwd_sx1302 pi_pkg/usr/bin/fwd
         ;;
     *)
+        cp -f rasp-postinst DEBIAN/postinst
         cp -rf config/cfg-30? pi_pkg/etc/lora/
         install -m 755 sx1302hal/libsx1302hal.so pi_pkg/usr/lib/libsx1302hal.so
         install -m 755 sx1302hal/test_loragw_hal_rx pi_pkg/usr/bin/rx_test

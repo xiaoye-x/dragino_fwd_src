@@ -112,38 +112,40 @@ bool pkt_basic_filter(serv_s* serv, const uint32_t addr, const uint8_t fport) {
     snprintf(addr_key, sizeof(addr_key), "%s/devaddr/%08X", serv->info.name, addr);
     snprintf(fport_key, sizeof(fport_key), "%s/fport/%u", serv->info.name, fport);
 
-	lgw_log(LOG_INFO, "INFO~ [%s-filter] with filter level %d fport %u, key: %s\n", serv->info.name, serv->filter.fport, addr, fport, fport_key);
+	lgw_log(LOG_DEBUG, "DEBUG~ [%s-filter] fport-lv=%d, addr-lv=%d, addr_key=%s, fport_key=%s\n", serv->info.name, serv->filter.fport, serv->filter.devaddr, addr_key, fport_key);
     
     switch(serv->filter.fport) {
         case INCLUDE: // 1
-            printf("#######################include\n");
+            lgw_log(LOG_DEBUG, "DEBUG~ [%s-filter] fport filter include\n", serv->info.name);
             if (lgw_db_key_exist(fport_key))
-                return false;   // no-filter
+                return true;  // filter
             break;
         case EXCLUDE: // 2
-            printf("#######################exclude\n");
-            if (lgw_db_key_exist(fport_key))
-                return true;   // filter
+            lgw_log(LOG_DEBUG, "DEBUG~ [%s-filter] fport filter exclude\n", serv->info.name);
+            if (!lgw_db_key_exist(fport_key)) {
+                return true;  //filter
+            }
             break;
-        case NOFILTER:
         default:
-            printf("#######################nofilter\n");
+            lgw_log(LOG_DEBUG, "DEBUG~ [%s-filter] fport nofilter\n", serv->info.name);
             break;
     }
 
     switch(serv->filter.devaddr) {
         case INCLUDE: //1
             if (lgw_db_key_exist(addr_key))
-                return false; // no-filter
-            else
-                return true;  //filter
+                return true; // filter
+            break;
         case EXCLUDE:
-            return lgw_db_key_exist(addr_key); 
-        case NOFILTER:
+            if (!lgw_db_key_exist(addr_key))
+                return true; 
+            break;
         default:
+            lgw_log(LOG_DEBUG, "DEBUG~ [%s-filter] devaddr nofilter\n", serv->info.name);
             break;
     }
 
+    lgw_log(LOG_DEBUG, "DEBUG~ [%s-filter] default: nofilter\n", serv->info.name);
     return false;  // no-filter
 }
 

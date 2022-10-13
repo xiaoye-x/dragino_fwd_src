@@ -45,6 +45,9 @@ DEPS=${SRCS:.c=.d}
 
 all: ${TARGET}
 
+#../bin/station_sx1302: station_main.c ../lib/libs2core.a $(wildcard ../lib/*.a)
+#../bin/station_sx1302: station_main.c ../lib/libs2core.a
+
 ifdef SX1302MOD
 ../bin/station_sx1302: station_main.c ../lib/libs2core.a $(wildcard ../lib/*.a)
 	@echo " [${ARCH}] CC   $@" ${NQ}

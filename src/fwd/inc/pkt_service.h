@@ -55,6 +55,7 @@ typedef struct _dn_pkt {
     uint8_t txbw;
     uint8_t txpw;
     uint8_t rxwindow;
+    uint8_t txport;
     uint32_t txfreq;
 } dn_pkt_s;
 

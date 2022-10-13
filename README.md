@@ -126,8 +126,21 @@ usb module can only make 60ms scan loop.
 1. fix bug can't get counter time form concentor when use sx1302
 
 ## 2022/07/11  (release: dragino_gw_fwd_2.7.1-1_mips_24kc.ipk )
-1. fix bug  rssi and snr not equal when macdecode
+1. fix bug  rssi and snr not equal when macdecode: change rssi_snr[18] to rssi_snr[32]
 2. add cfg-30? configure file to config path
 
 ## 2022/07/14  (release: dragino_gw_fwd_2.7.2-0_mips_24kc.ipk )
 1. add time section for rxpkt when timer_ref by system  (semtech_serv.c)
+
+## 2022/07/22  (release: dragino_gw_fwd_2.7.3-0_mips_24kc.ipk )
+1. fix bug of fport filter  (65536 to 0)
+
+## 2022/09/08 
+1. chan fwd VERSION to 2.1.0
+
+## 2022/09/26
+1. custom downlink add fport control
+2. chan fwd VERSION to 2.7.5
+
+## 2022/00/13
+1. basicstaion version upgrade to V2.0.6 (openwrt platform)

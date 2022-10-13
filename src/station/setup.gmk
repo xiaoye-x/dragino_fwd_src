@@ -46,6 +46,7 @@ ARCH.linuxV2 = x86_64-linux-gnu
 ARCH.linuxpico = x86_64-linux-gnu
 ARCH.corecell  = arm-linux-gnueabihf
 ARCH.rpi     = arm-linux-gnueabihf
+ARCH.arm     = arm-linux-gnueabihf
 ARCH.kerlink = arm-klk-linux-gnueabi
 ARCH.mips-openwrt = mips-openwrt-linux-musl
 ARCH=${ARCH.${platform}}
@@ -135,6 +136,8 @@ LIBS.corecell = -llgw1302  ${MBEDLIBS}      -lpthread -lrt
 LIBS.rpi     = -llgw   ${MBEDLIBS}      -lpthread
 LIBS.kerlink = -llgw   ${MBEDLIBS} -lrt -lpthread
 
+#LIBS.dragino   = -L${LGWLIB} -lsx1302hal ${MBEDLIBS} -lpthread
+#
 ifdef SX1302MOD
 LGWLIB = ${TD}/../sx1302hal
 LIBS.dragino   = -L${LGWLIB} -lsx1302hal ${MBEDLIBS} -lpthread
