@@ -1045,6 +1045,7 @@ static void gps_process_coords(void) {
 	/* position variable */
 	struct coord_s coord;
 	struct coord_s gpserr;
+
 	int i = lgw_gps_get(NULL, NULL, &coord, &gpserr);
 
 	/* update gateway coordinates */

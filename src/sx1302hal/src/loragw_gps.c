@@ -47,6 +47,7 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
     #define DEBUG_ARRAY(a,b,c)  for(a=0;a!=0;){}
     #define CHECK_NULL(a)       if(a==NULL){return LGW_GPS_ERROR;}
 #endif
+
 #define TRACE()         fprintf(stderr, "@ %s %d\n", __FUNCTION__, __LINE__);
 
 /* -------------------------------------------------------------------------- */
@@ -509,6 +510,7 @@ enum gps_msg lgw_parse_nmea(const char *serial_buff, int buff_size) {
     int nb_fields; /* number of strings detected by string chopping */
     char parser_buf[256]; /* parsing modifies buffer so need a local copy */
 
+    DEBUG_MSG("[GPS] Note: parsing nmea mesaage ...\n");
     /* check input parameters */
     if (serial_buff == NULL) {
         return UNKNOWN;
@@ -527,6 +529,7 @@ enum gps_msg lgw_parse_nmea(const char *serial_buff, int buff_size) {
         DEBUG_MSG("Warning: invalid NMEA sentence (bad checksum)\n");
         return INVALID;
     } else if (match_label(serial_buff, "$G?RMC", 6, '?')) {
+        DEBUG_MSG("[GPS] Note: NMEA sentence (G?RMC)\n");
         /*
         NMEA sentence format: $xxRMC,time,status,lat,NS,long,EW,spd,cog,date,mv,mvEW,posMode*cs<CR><LF>
         Valid fix: $GPRMC,083559.34,A,4717.11437,N,00833.91522,E,0.004,77.52,091202,,,A*00
@@ -535,7 +538,7 @@ enum gps_msg lgw_parse_nmea(const char *serial_buff, int buff_size) {
         memcpy(parser_buf, serial_buff, buff_size);
         parser_buf[buff_size] = '\0';
         nb_fields = str_chop(parser_buf, buff_size, ',', str_index, ARRAY_SIZE(str_index));
-        if (nb_fields != 13) {
+        if (nb_fields < 13) {
             DEBUG_MSG("Warning: invalid RMC sentence (number of fields)\n");
             return IGNORED;
         }
@@ -550,18 +553,19 @@ enum gps_msg lgw_parse_nmea(const char *serial_buff, int buff_size) {
         if ((i == 4) && (j == 3)) {
             if ((gps_mod == 'A') || (gps_mod == 'D')) {
                 gps_time_ok = true;
-                DEBUG_MSG("Note: Valid RMC sentence, GPS locked, date: 20%02d-%02d-%02dT%02d:%02d:%06.3fZ\n", gps_yea, gps_mon, gps_day, gps_hou, gps_min, gps_fra + (float)gps_sec);
+                DEBUG_MSG("[GPS] Note: Valid RMC sentence, GPS locked, date: 20%02d-%02d-%02dT%02d:%02d:%06.3fZ\n", gps_yea, gps_mon, gps_day, gps_hou, gps_min, gps_fra + (float)gps_sec);
             } else {
                 gps_time_ok = false;
-                DEBUG_MSG("Note: Valid RMC sentence, no satellite fix, estimated date: 20%02d-%02d-%02dT%02d:%02d:%06.3fZ\n", gps_yea, gps_mon, gps_day, gps_hou, gps_min, gps_fra + (float)gps_sec);
+                DEBUG_MSG("[GPS] Note: Valid RMC sentence, no satellite fix, estimated date: 20%02d-%02d-%02dT%02d:%02d:%06.3fZ\n", gps_yea, gps_mon, gps_day, gps_hou, gps_min, gps_fra + (float)gps_sec);
             }
         } else {
             /* could not get a valid hour AND date */
             gps_time_ok = false;
-            DEBUG_MSG("Note: Valid RMC sentence, mode %c, no date\n", gps_mod);
+            DEBUG_MSG("[GPS] Note: Valid RMC sentence, mode %c, no date\n", gps_mod);
         }
         return NMEA_RMC;
     } else if (match_label(serial_buff, "$G?GGA", 6, '?')) {
+        DEBUG_MSG("GPS Note: NMEA sentence (G?GGA)\n");
         /*
         NMEA sentence format: $xxGGA,time,lat,NS,long,EW,quality,numSV,HDOP,alt,M,sep,M,diffAge,diffStation*cs<CR><LF>
         Valid fix: $GPGGA,092725.00,4717.11399,N,00833.91590,E,1,08,1.01,499.6,M,48.0,M,,*5B
