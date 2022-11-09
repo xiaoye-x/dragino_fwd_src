@@ -69,7 +69,7 @@
 
 #define DEFAULT_BEACON_POLL_MS              50	        /* time in ms between polling of beacon TX status */
 
-#define DEFAULT_RXPKTS_LIST_SIZE            4           
+#define DEFAULT_RXPKTS_LIST_SIZE            8           
 
 #define TX_BUFF_SIZE                        ((540 * NB_PKT_MAX) + 30 + STATUS_SIZE)
 

@@ -84,7 +84,7 @@ case "$board" in
         install -m 755 sx1302hal/test_loragw_com pi_pkg/usr/bin/com_test
         install -m 755 sx1302hal/test_loragw_com_sx1250 pi_pkg/usr/bin/sx1250_test
         install -m 755 build_fwd_sx1302/fwd_sx1302 pi_pkg/usr/bin
-        install -m 755 build_station_sx1302/build-mips-openwrt-dragino/bin/station_sx1302 pi_pkg/usr/bin
+        install -m 755 build_station_sx1302/build-arm-dragino/bin/station_sx1302 pi_pkg/usr/bin
         install -m 644 config/hp0c-global_conf.json pi_pkg/etc/lora/global_conf.json
         install -m 755 tools/reset_lgw-hp0c.sh pi_pkg/usr/bin/reset_lgw.sh
         ln -sf /usr/bin/fwd_sx1302 pi_pkg/usr/bin/fwd
@@ -99,7 +99,7 @@ case "$board" in
         install -m 755 sx1302hal/test_loragw_com pi_pkg/usr/bin/com_test
         install -m 755 sx1302hal/test_loragw_com_sx1250 pi_pkg/usr/bin/sx1250_test
         install -m 755 build_fwd_sx1302/fwd_sx1302 pi_pkg/usr/bin
-        install -m 755 build_station_sx1302/build-mips-openwrt-dragino/bin/station_sx1302 pi_pkg/usr/bin
+        install -m 755 build_station_sx1302/build-arm-dragino/bin/station_sx1302 pi_pkg/usr/bin
         cp -f config/hp0d-global_conf.json pi_pkg/etc/lora/global_conf.json
         install -m 755 tools/reset_lgw-hp0d.sh pi_pkg/usr/bin/reset_lgw.sh
         ln -sf /usr/bin/fwd_sx1302 pi_pkg/usr/bin/fwd
@@ -111,7 +111,7 @@ case "$board" in
         install -m 755 libmpsse/libmpsse.so pi_pkg/usr/lib/libmpsse.so
         install -m 755 sx1301hal/libsx1301hal.so pi_pkg/usr/lib/libsx1301hal.so
         install -m 755 build_fwd_sx1301/fwd_sx1301 pi_pkg/usr/bin
-        install -m 755 build_station_sx1301/build-mips-openwrt-dragino/bin/station_sx1301 pi_pkg/usr/bin
+        install -m 755 build_station_sx1301/build-arm-dragino/bin/station_sx1301 pi_pkg/usr/bin
         install -m 755 tools/reset_lgw-hp0d.sh pi_pkg/usr/bin/reset_lgw.sh
         ln -sf /usr/bin/fwd_sx1301 pi_pkg/usr/bin/fwd
         ;;
@@ -125,7 +125,7 @@ case "$board" in
         install -m 755 sx1302hal/test_loragw_com pi_pkg/usr/bin/com_test
         install -m 755 sx1302hal/test_loragw_com_sx1250 pi_pkg/usr/bin/sx1250_test
         install -m 755 build_fwd_sx1302/fwd_sx1302 pi_pkg/usr/bin
-        install -m 755 build_station_sx1302/build-mips-openwrt-dragino/bin/station_sx1302 pi_pkg/usr/bin
+        install -m 755 build_station_sx1302/build-arm-dragino/bin/station_sx1302 pi_pkg/usr/bin
         cp -f config/hp0d-global_conf.json pi_pkg/etc/lora/global_conf.json
         install -m 755 tools/reset_lgw-hp0d.sh pi_pkg/usr/bin/reset_lgw.sh
         ln -sf /usr/bin/fwd_sx1302 pi_pkg/usr/bin/fwd
@@ -140,7 +140,7 @@ case "$board" in
         install -m 755 sx1302hal/test_loragw_com pi_pkg/usr/bin/com_test
         install -m 755 sx1302hal/test_loragw_com_sx1250 pi_pkg/usr/bin/sx1250_test
         install -m 755 build_fwd_sx1302/fwd_sx1302 pi_pkg/usr/bin
-        install -m 755 build_station_sx1302/build-mips-openwrt-dragino/bin/station_sx1302 pi_pkg/usr/bin
+        install -m 755 build_station_sx1302/build-arm-dragino/bin/station_sx1302 pi_pkg/usr/bin
         cp -f config/hp0d-global_conf.json pi_pkg/etc/lora/global_conf.json
         install -m 755 tools/reset_lgw-hp0d.sh pi_pkg/usr/bin/reset_lgw.sh
         ln -sf /usr/bin/fwd_sx1302 pi_pkg/usr/bin/fwd

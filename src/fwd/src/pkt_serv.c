@@ -533,6 +533,8 @@ static void pkt_prepare_downlink(void* arg) {
     uint8_t buff_down[512]; /* buffer to receive downstream packets */
     uint8_t dnpld[256];
     uint8_t hexpld[256];
+
+    uint32_t bw_display;
     
     dn_pkt_s* entry = NULL;
     dn_pkt_s* element = NULL;
@@ -637,8 +639,6 @@ static void pkt_prepare_downlink(void* arg) {
                         entry->txdr = DR_LORA_SF5; 
                     else if (!strncmp(tmpstr, "SF6", 3))
                         entry->txdr = DR_LORA_SF6; 
-                    else if (!strncmp(tmpstr, "SF7", 3))
-                        entry->txdr = DR_LORA_SF7; 
                     else 
                         entry->txdr = 0; 
                 } else 
@@ -678,8 +678,54 @@ static void pkt_prepare_downlink(void* arg) {
                     lgw_memcpy(entry->payload, dnpld, psize + 1);
 
                 entry->psize = psize;
-				
-                lgw_log(LOG_DEBUG, "DEBUG~ [DNLK]devaddr:%s, txmode:%s, pdfm:%s, size:%d, freq:%u, bw:%u, dr:%u\n", entry->devaddr, entry->txmode, entry->pdformat, entry->psize, entry->txfreq, entry->txbw, entry->txdr);
+#ifdef SX1302MOD
+                switch(entry->txbw) {
+                    case 0x1:
+                        entry->txbw = 0x6;
+                        bw_display = 500000;
+                        break;
+                    case 0x2:
+                        entry->txbw = 0x5;
+                        bw_display = 250000;
+                        break;
+                    case 0x3:
+                        entry->txbw = 0x4;
+                        bw_display = 125000;
+                        break;
+                    default:
+                        bw_display = 0;
+                        break;
+                }
+#else
+                switch(entry->txbw) {
+                    case 0x1:
+                        bw_display = 500000;
+                        break;
+                    case 0x2:
+                        bw_display = 250000;
+                        break;
+                    case 0x3:
+                        bw_display = 125000;
+                        break;
+                    case 0x4:
+                        bw_display = 62000;
+                        break;
+                    case 0x5:
+                        bw_display = 31200;
+                        break;
+                    case 0x6:
+                        bw_display = 15600;
+                        break;
+                    case 0x7:
+                        bw_display = 7800;
+                        break;
+                    default:
+                        bw_display = 0;
+                        break;
+                }
+#endif
+
+                lgw_log(LOG_DEBUG, "DEBUG~ [DNLK]devaddr:%s, txmode:%s, pdfm:%s, size:%d, freq:%u, bw:%u, dr:%u\n", entry->devaddr, entry->txmode, entry->pdformat, entry->psize, entry->txfreq, bw_display, entry->txdr);
                 lgw_log(LOG_DEBUG, "DEBUG~ [DNLK]payload:\"%s\"\n", entry->payload); 
 
                 if (strstr(entry->txmode, "imme") != NULL) {

@@ -418,7 +418,7 @@ int get_rxpkt(serv_s* serv) {
     int ret = 0;
     rxpkts_s* rxpkt_entry;
 
-    //LGW_LIST_LOCK(&GW.rxpkts_list);
+    LGW_LIST_LOCK(&GW.rxpkts_list);
     LGW_LIST_TRAVERSE(&GW.rxpkts_list, rxpkt_entry, list) {
         ret = 0;
         if (NULL == rxpkt_entry)
@@ -429,13 +429,13 @@ int get_rxpkt(serv_s* serv) {
         memset(serv->rxpkt, 0, sizeof(serv->rxpkt));
         memcpy(serv->rxpkt, rxpkt_entry->rxpkt, sizeof(struct lgw_pkt_rx_s) * rxpkt_entry->nb_pkt);
         ret = rxpkt_entry->nb_pkt;
-        pthread_mutex_lock(&GW.mx_bind_lock);
+        //pthread_mutex_lock(&GW.mx_bind_lock);
         rxpkt_entry->stamps |= serv->info.stamp;
         rxpkt_entry->bind--;
-        pthread_mutex_unlock(&GW.mx_bind_lock);
+        //pthread_mutex_unlock(&GW.mx_bind_lock);
         break;
     }
-    //LGW_LIST_UNLOCK(&GW.rxpkts_list);
+    LGW_LIST_UNLOCK(&GW.rxpkts_list);
     return ret;
 }
 
@@ -450,6 +450,7 @@ int main(int argc, char *argv[]) {
 
 	/* threads */
 	pthread_t thrid_up;
+	pthread_t thrid_recycle;
 	pthread_t thrid_gps;
 	pthread_t thrid_valid;
 	pthread_t thrid_jit;
@@ -614,6 +615,11 @@ int main(int argc, char *argv[]) {
     else
         lgw_db_put("thread", "thread_up", "running");
 
+    if (lgw_pthread_create(&thrid_recycle, NULL, (void *(*)(void *))thread_rxpkt_recycle, NULL))
+		lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create rxpkt recycle thread\n");
+    else
+        lgw_db_put("thread", "thread_rxpkt_recycle", "running");
+
     /* JIT queue initialization */
     jit_queue_init(&GW.tx.jit_queue[0]);
     jit_queue_init(&GW.tx.jit_queue[1]);
@@ -705,8 +711,12 @@ int main(int argc, char *argv[]) {
 
 	//TODO: Dit heeft nawerk nodig / This needs some more work
 	pthread_cancel(thrid_jit);	/* don't wait for jit thread */
+
 	if ((i = pthread_join(thrid_up, NULL)) != 0)
-        lgw_log(LOG_ERROR, "ERROR~ failed to join Spectral Scan thread with %d - %s\n", i, strerror(errno));
+        lgw_log(LOG_ERROR, "ERROR~ failed to join data up thread with %d - %s\n", i, strerror(errno));
+
+	if ((i = pthread_join(thrid_recycle, NULL)) != 0)
+        lgw_log(LOG_ERROR, "ERROR~ failed to join recycle thread with %d - %s\n", i, strerror(errno));
 
 	if (GW.gps.gps_enabled == true) {
 		pthread_cancel(thrid_gps);	        /* don't wait for GPS thread */
@@ -741,7 +751,7 @@ int main(int argc, char *argv[]) {
 
     lgw_run_atexits(1);
 
-    thread_rxpkt_recycle();
+    //thread_rxpkt_recycle();
 
 	/* if an exit signal was received, try to quit properly */
 	if (exit_sig || quit_sig) {
@@ -772,11 +782,11 @@ static void thread_up(void) {
 	/* allocate memory for packet fetching and processing */
 	struct lgw_pkt_rx_s rxpkt[NB_PKT_MAX];	/* array containing inbound packets + metadata */
 	int nb_pkt;
+    uint32_t lastest_us = 0;
 
     rxpkts_s *rxpkt_entry = NULL;
     serv_s* serv_entry = NULL;
 
-	pthread_t thrid_recycle;
 
 	lgw_log(LOG_INFO, "INFO~ [main-up] Thread activated for all servers.\n");
 
@@ -793,30 +803,6 @@ static void thread_up(void) {
 
 		if (nb_pkt == LGW_HAL_ERROR) {
 			lgw_log(LOG_ERROR, "ERROR~ [main-up] HAL receive failed, try restart HAL\n");
-            /*
-		    pthread_mutex_lock(&GW.hal.mx_concent);
-			lgw_log(LOG_ERROR, "[main-up] ReStarting... HAL\n");
-			if (HAL.lgw_stop() == LGW_HAL_SUCCESS) {
-                if (system("/usr/bin/reset_lgw.sh stop") != 0) {
-                    lgw_log(LOG_ERROR, "ERROR~ [main-up] restart HAL failed!\n");
-                    GW.cfg.radiostream_enabled = false;
-                    lgw_log(LOG_WARNING, "WARNING~ [main-up] close radiostream!\n");
-                } else if (system("/usr/bin/reset_lgw.sh start") != 0) { 
-                    lgw_log(LOG_ERROR, "ERROR~ [main-up] restart HAL failed!\n");
-                    GW.cfg.radiostream_enabled = false;
-                    lgw_log(LOG_WARNING, "WARNING~ [main-up] close radiostream!\n");
-                } else if (HAL.lgw_start() != LGW_HAL_SUCCESS) {
-                    lgw_log(LOG_ERROR, "ERROR~ [main-up] restart HAL failed!\n");
-                    GW.cfg.radiostream_enabled = false;
-                    lgw_log(LOG_WARNING, "WARNING~ [main-up] close radiostream!\n");
-                } else 
-                    lgw_log(LOG_INFO, "INFO~ [main-up] Restar radio HAL successful!\n");
-			} else {
-				lgw_log(LOG_WARNING, "WARNING~ [main-up] failed to restart HAL\n");
-                GW.cfg.radiostream_enabled = false;
-			}
-		    pthread_mutex_unlock(&GW.hal.mx_concent);
-            */
 			exit(EXIT_FAILURE);
 		}
 
@@ -829,6 +815,8 @@ static void thread_up(void) {
 			continue;
 		}
 
+        lastest_us = rxpkt[0].count_us;
+
         rxpkt_entry = lgw_malloc(sizeof(rxpkts_s));     //rxpkts结构体包含有一个lora_pkt_rx_s结构数组
 
         if (NULL == rxpkt_entry) {
@@ -836,6 +824,7 @@ static void thread_up(void) {
         }
 
         rxpkt_entry->list.next = NULL;
+        rxpkt_entry->entry_us = lastest_us;
         rxpkt_entry->stamps = 0;
         rxpkt_entry->nb_pkt = nb_pkt;
         rxpkt_entry->bind = GW.serv_list.size;
@@ -849,16 +838,13 @@ static void thread_up(void) {
         
         LGW_LIST_TRAVERSE(&GW.serv_list, serv_entry, list) {
             if (sem_post(&serv_entry->thread.sema))
-	            lgw_log(LOG_DEBUG, "DEBUG~ [%s-up] %s\n", serv_entry->info.name, strerror(errno));
+	            lgw_log(LOG_DEBUG, "DEBUG~ [%s-up] post sem to all service, (%s)\n", serv_entry->info.name, strerror(errno));
         }
 
         //service_handle_rxpkt(rxpkt_entry);
         //lgw_free(rxpkt_entry);
 
-        if (GW.rxpkts_list.size > DEFAULT_RXPKTS_LIST_SIZE)    // if number of head list greater than LIST_SIZE  
-        //if (GW.rxpkts_list.size > 0)    //debug 
-           lgw_pthread_create_detached_background(&thrid_recycle, NULL, (void *(*)(void *))thread_rxpkt_recycle, NULL); 
-           //thread_rxpkt_recycle();
+        //thread_rxpkt_recycle();
 	}
 
 	lgw_log(LOG_INFO, "INFO~ [main-up] End of upstream thread\n");
@@ -868,22 +854,41 @@ static void thread_up(void) {
 /* --- THREAD : recycle rxpkts --------------------- */
 
 static void thread_rxpkt_recycle(void) {
+    int time_ms = DEFAULT_FETCH_SLEEP_MS * DEFAULT_RXPKTS_LIST_SIZE;
+
     rxpkts_s* rxpkt_entry = NULL;
+    serv_s* serv_entry = NULL;
 
-	lgw_log(LOG_DEBUG, "\nDEBUG~ [MAIN] running packages recycle thread\n");
+	lgw_log(LOG_INFO, "INFO~ [Recycle-service] Start rxpkt recycle thread\n");
 
-    LGW_LIST_LOCK(&GW.rxpkts_list);
-    LGW_LIST_TRAVERSE_SAFE_BEGIN(&GW.rxpkts_list, rxpkt_entry, list) {
-	    lgw_log(LOG_DEBUG, "\nDEBUG~ [MAIN] recycle thread start traverse, bind=%d\n", rxpkt_entry->bind);
-        if (rxpkt_entry->bind < 1 || exit_sig) {
-            LGW_LIST_REMOVE_CURRENT(list);
-            lgw_free(rxpkt_entry);
-            GW.rxpkts_list.size--;
+	while (!exit_sig && !quit_sig) {
+
+		wait_ms(time_ms);
+
+        if (GW.rxpkts_list.size > 1) {   
+            LGW_LIST_TRAVERSE(&GW.serv_list, serv_entry, list) {
+                if (sem_post(&serv_entry->thread.sema))
+	                lgw_log(LOG_DEBUG, "DEBUG~ [%s-recycle] service check rxpkts %s\n", serv_entry->info.name, strerror(errno));
+            }
         }
+
+        if (GW.rxpkts_list.size > DEFAULT_RXPKTS_LIST_SIZE) {   
+	        lgw_log(LOG_DEBUG, "\nDEBUG~ [Recycle-service] running packages recycle thread, total(=%d)\n", GW.rxpkts_list.size);
+
+            LGW_LIST_LOCK(&GW.rxpkts_list);
+            LGW_LIST_TRAVERSE_SAFE_BEGIN(&GW.rxpkts_list, rxpkt_entry, list) {
+                if ((cur_hal_time - rxpkt_entry->entry_us > 3000000) || (rxpkt_entry->bind < 1)) {
+                    LGW_LIST_REMOVE_CURRENT(list);
+                    lgw_free(rxpkt_entry);
+                    GW.rxpkts_list.size--;
+                }
+            }
+            LGW_LIST_TRAVERSE_SAFE_END;
+            LGW_LIST_UNLOCK(&GW.rxpkts_list);
+	    }
     }
-    LGW_LIST_TRAVERSE_SAFE_END;
-    LGW_LIST_UNLOCK(&GW.rxpkts_list);
-    return;
+
+	lgw_log(LOG_INFO, "INFO~ [Recycle-service] End of rxpkt recycle thread\n");
 }
 
 /* -------------------------------------------------------------------------- */

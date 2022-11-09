@@ -103,6 +103,7 @@ typedef struct _thread_info {
 typedef struct _rxpkts {   /* rx packages receive from radio or socke */
     LGW_LIST_ENTRY(_rxpkts) list;
     //bool deal;
+    uint32_t entry_us;     //插入添加时间
     uint8_t stamps;        //这个指示当前有什么服务对这个包打上了印记
     uint8_t nb_pkt;
     uint8_t bind;          //当前还剩多少连接，当连接为0时，将会移除这个包
